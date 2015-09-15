@@ -40,6 +40,9 @@ RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 #####重启Apache 使配置生效
 RUN service apache2 restart
 
+#######   install wget
+RUN apt-get install wget
+
 ##### build jni
 ADD ./config/jni /usr/src/jni/
 WORKDIR /usr/src/
