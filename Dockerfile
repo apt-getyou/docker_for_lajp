@@ -47,7 +47,9 @@ RUN service apache2 restart
 ADD ./config/jni /usr/src/jni/
 WORKDIR /usr/src/
 RUN chmod +x ./jni/install.sh ./jni/make.sh
-RUN tar -zxvf ./jni/jdk-7u80-linux-x64.tar.gz -C /usr/src/
+WORKDIR /usr/src/
+RUN  wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u80-b15/jdk-7u80-linux-x64.tar.gz
+RUN tar -zxvf jdk-7u80-linux-x64.tar.gz -C /usr/src/
 RUN echo "export JAVA_HOME=/usr/src/jdk1.7.0_80" >> /etc/profile
 CMD ["/bin/bash" , "source /etc/profile"] 
 #RUN ["source","/etc/profile"]
