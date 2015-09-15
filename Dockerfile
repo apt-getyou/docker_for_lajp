@@ -16,7 +16,7 @@ MAINTAINER apt-getyou "792122911@qq.com"
 ENV REFRESHED_AT 2015-08-26
 RUN mv /etc/apt/sources.list  /etc/apt/sources.list_bak
 ADD ./config/sources.list /etc/apt/
-RUN apt-get update && apt-get -y upgrade
+RUN apt-get update
 
 #######   install apache2
 RUN apt-get install -y apache2 apache2-mpm-prefork apache2-utils
@@ -30,9 +30,6 @@ RUN apt-get install -y php5 php5-cgi php5-cli php5-common php5-curl \
 ###### install jdk maven
 RUN apt-get install -y maven
 ##RUN apt-get install -y openjdk-7-jdk
-
-##### clean
-RUN apt-get autoclean
 
 #####配置 Apache 
 RUN a2enmod rewrite
@@ -87,6 +84,8 @@ RUN echo "export PATH=$PATH:~/.composer/vendor/bin" >> /etc/profile
 CMD ["/bin/bash" , "source /etc/profile"]
 
 RUN apt-get install vim
+RUN apt-get -y upgrade
+
 # EXPOSE 80
 RUN apt-get autoclean && apt-get clean && apt-get autoremove
 
