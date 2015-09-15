@@ -27,8 +27,6 @@ RUN apt-get install -y php5 php5-cgi php5-cli php5-common php5-curl \
   php5-odbc php5-sybase php5-pinba php5-redis php5-sqlite php5-xmlrpc \
   php5-mongo libapache2-mod-php5
 
-###### install jdk maven
-RUN apt-get install -y maven
 ##RUN apt-get install -y openjdk-7-jdk
 
 #####配置 Apache 
@@ -50,24 +48,31 @@ RUN chmod +x ./jni/install.sh ./jni/make.sh
 WORKDIR /usr/src/
 RUN  wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u80-b15/jdk-7u80-linux-x64.tar.gz
 RUN tar -zxvf jdk-7u80-linux-x64.tar.gz -C /usr/src/
+RUN rm jdk-7u80-linux-x64.tar.gz
+
+####composer and laravel 按需求安装 可能需要翻墙
+RUN apt-get install -y curl
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/bin -- --filename=composer
+RUN composer config -g repositories.packagist composer http://packagist.phpcomposer.com
+RUN composer global require "laravel/installer=~1.1"
+
+#### set PATH
 RUN echo "export JAVA_HOME=/usr/src/jdk1.7.0_80" >> /etc/profile
-CMD ["/bin/bash" , "source /etc/profile"] 
-#RUN ["source","/etc/profile"]
-RUN echo "export PATH=$PATH:$JAVA_HOME/bin" >> /etc/profile
-RUN echo "export JRE_HOME=$JAVA_HOME/jre" >> /etc/profile
-RUN echo "export CLASSPATH=.:$JAVA_HOME/lib:$JRE_HOME/lib" >> /etc/profile
+RUN echo "export PATH=\$PATH:$JAVA_HOME/bin:~/.composer/vendor/bin" >> /etc/profile
+RUN echo "export JRE_HOME=\$JAVA_HOME/jre" >> /etc/profile
+RUN echo "export CLASSPATH=.:\$JAVA_HOME/lib:\$JRE_HOME/lib" >> /etc/profile
 
 CMD ["/bin/bash" , "source /etc/profile"] 
-# ENTRYPOINT source /etc/profile
-#RUN ["source","/etc/profile"]
 CMD ["/bin/bash" , "javac -version"]  
+CMD ["/bin/bash" , "composer"]
 CMD ["/bin/bash" , "./jni/make.sh"]
 RUN cp ./jni/liblajpmsgq.so /usr/lib/
 
 WORKDIR /usr/src/
 RUN rm -fr /usr/src/jni
 
-
+###### install jdk maven
+RUN apt-get install -y maven
  
 ###### install git
 RUN apt-get install -y git
@@ -78,15 +83,9 @@ RUN apt-get install -y git
 # RUN ssh-keygen
 
 
-####composer and laravel 按需求安装 可能需要翻墙
-RUN apt-get install -y curl
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/bin -- --filename=composer
-RUN composer config -g repositories.packagist composer http://packagist.phpcomposer.com
-RUN composer global require "laravel/installer=~1.1"
-RUN echo "export PATH=$PATH:~/.composer/vendor/bin" >> /etc/profile
-CMD ["/bin/bash" , "source /etc/profile"]
 
-RUN apt-get install vim
+
+RUN apt-get install -y vim
 RUN apt-get -y upgrade
 
 # EXPOSE 80
