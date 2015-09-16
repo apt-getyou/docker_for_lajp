@@ -58,13 +58,18 @@ RUN composer global require "laravel/installer=~1.1"
 
 #### set PATH
 RUN echo "export JAVA_HOME=/usr/src/jdk1.7.0_80" >> /etc/profile
-RUN echo "export PATH=\$PATH:$JAVA_HOME/bin:~/.composer/vendor/bin" >> /etc/profile
-RUN echo "export JRE_HOME=\$JAVA_HOME/jre" >> /etc/profile
-RUN echo "export CLASSPATH=.:\$JAVA_HOME/lib:\$JRE_HOME/lib" >> /etc/profile
-
+CMD ["/bin/bash" , "source /etc/profile"]
+RUN echo "export PATH=$PATH:$JAVA_HOME/bin:~/.composer/vendor/bin" >> /etc/profile
+RUN echo "export JRE_HOME=$JAVA_HOME/jre" >> /etc/profile
+CMD ["/bin/bash" , "source /etc/profile"]
+RUN echo "export CLASSPATH=.:$JAVA_HOME/lib:$JRE_HOME/lib" >> /etc/profile
 CMD ["/bin/bash" , "source /etc/profile"] 
 CMD ["/bin/bash" , "javac -version"]  
 CMD ["/bin/bash" , "composer"]
+
+#### install gcc
+RUN apt-get install -y gcc
+
 CMD ["/bin/bash" , "./jni/make.sh"]
 RUN cp ./jni/liblajpmsgq.so /usr/lib/
 RUN rm ./jni/liblajpmsgq.so
