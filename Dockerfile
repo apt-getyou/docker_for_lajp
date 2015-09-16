@@ -44,7 +44,7 @@ RUN apt-get install wget
 ##### build jni
 ADD ./config/jni /usr/src/jni/
 WORKDIR /usr/src/
-RUN chmod +x ./jni/install.sh ./jni/make.sh
+RUN chmod +x ./jni/make.sh
 WORKDIR /usr/src/
 RUN  wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u80-b15/jdk-7u80-linux-x64.tar.gz
 RUN tar -zxvf jdk-7u80-linux-x64.tar.gz -C /usr/src/
@@ -67,6 +67,7 @@ CMD ["/bin/bash" , "javac -version"]
 CMD ["/bin/bash" , "composer"]
 CMD ["/bin/bash" , "./jni/make.sh"]
 RUN cp ./jni/liblajpmsgq.so /usr/lib/
+RUN rm ./jni/liblajpmsgq.so
 
 WORKDIR /usr/src/
 RUN rm -fr /usr/src/jni
