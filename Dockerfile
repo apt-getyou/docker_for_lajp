@@ -11,13 +11,15 @@
 #		|-- git
 #		|-- maven
 #		|-- composer
-FROM ubuntu:14.04
+FROM ubuntu
 MAINTAINER apt-getyou "792122911@qq.com"
 ENV REFRESHED_AT 2015-08-26
+ENV DEBIAN_FRONTEND=noninteractive
 RUN mv /etc/apt/sources.list  /etc/apt/sources.list_bak
 ADD ./config/sources.list /etc/apt/
-RUN apt-get update
+RUN apt-get update && apt-get -y upgrade
 
+RUN apt-get install dialog
 #######   install apache2
 RUN apt-get install -y apache2 apache2-mpm-prefork apache2-utils
 
@@ -46,9 +48,10 @@ ADD ./config/jni /usr/src/jni/
 WORKDIR /usr/src/
 RUN chmod +x ./jni/make.sh
 WORKDIR /usr/src/
+#RUN apt-get install -y aria2
+#RUN aria2c --header="Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u80-b15/jdk-7u80-linux-x64.tar.gz
 RUN  wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u80-b15/jdk-7u80-linux-x64.tar.gz
 RUN tar -zxvf jdk-7u80-linux-x64.tar.gz -C /usr/src/
-RUN rm jdk-7u80-linux-x64.tar.gz
 
 ####composer and laravel 按需求安装 可能需要翻墙
 RUN apt-get install -y curl
@@ -56,25 +59,28 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/bin -- --
 RUN composer config -g repositories.packagist composer http://packagist.phpcomposer.com
 RUN composer global require "laravel/installer=~1.1"
 
+#### install gcc
+RUN apt-get install -y gcc
+
 #### set PATH
 RUN echo "export JAVA_HOME=/usr/src/jdk1.7.0_80" >> /etc/profile
 CMD ["/bin/bash" , "source /etc/profile"]
-RUN echo "export PATH=$PATH:$JAVA_HOME/bin:~/.composer/vendor/bin" >> /etc/profile
-RUN echo "export JRE_HOME=$JAVA_HOME/jre" >> /etc/profile
+RUN echo "export PATH=\$PATH:\$JAVA_HOME/bin:~/.composer/vendor/bin" >> /etc/profile
+RUN echo "export JRE_HOME=\$JAVA_HOME/jre" >> /etc/profile
 CMD ["/bin/bash" , "source /etc/profile"]
-RUN echo "export CLASSPATH=.:$JAVA_HOME/lib:$JRE_HOME/lib" >> /etc/profile
+RUN echo "export CLASSPATH=.:\$JAVA_HOME/lib:\$JRE_HOME/lib" >> /etc/profile
+CMD ['/bin/bash','source /etc/profile']
+CMD ['/bin/sh','source /etc/profile']
 CMD ["/bin/bash" , "source /etc/profile"] 
 CMD ["/bin/bash" , "javac -version"]  
 CMD ["/bin/bash" , "composer"]
 
-#### install gcc
-RUN apt-get install -y gcc
+
 
 CMD ["/bin/bash" , "./jni/make.sh"]
 RUN cp ./jni/liblajpmsgq.so /usr/lib/
-RUN rm ./jni/liblajpmsgq.so
 
-WORKDIR /usr/src/
+RUN rm jdk-7u80-linux-x64.tar.gz
 RUN rm -fr /usr/src/jni
 
 ###### install jdk maven
@@ -92,7 +98,6 @@ RUN apt-get install -y git
 
 
 RUN apt-get install -y vim
-RUN apt-get -y upgrade
 
 # EXPOSE 80
 RUN apt-get autoclean && apt-get clean && apt-get autoremove
