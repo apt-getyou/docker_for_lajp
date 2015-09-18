@@ -17,5 +17,6 @@
 #						: 获得本机的<java.library.path>
 # -----------------------------------------------------------
 # 
-echo "gcc lajp_MsgQ.c  --share -FPIC -I. -I$JAVA_HOME/include -I$JAVA_HOME/include/linux -o liblajpmsgq.so"
-gcc lajp_MsgQ.c  --share -fPIC -I. -I$JAVA_HOME/include -I$JAVA_HOME/include/linux -o liblajpmsgq.so
+# 
+#echo "gcc lajp_MsgQ.c  --share -FPIC -I. -I/usr/src/jdk1.7.0_80/include -I/usr/src/jdk1.7.0_80/include/linux -o liblajpmsgq.so"
+gcc lajp_MsgQ.c  --share -fPIC -I. -I/usr/src/jdk1.7.0_80/include -I/usr/src/jdk1.7.0_80/include/linux -o liblajpmsgq.so

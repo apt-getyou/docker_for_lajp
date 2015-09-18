@@ -14,7 +14,13 @@
 FROM ubuntu
 MAINTAINER apt-getyou "792122911@qq.com"
 ENV REFRESHED_AT 2015-08-26
-ENV DEBIAN_FRONTEND=noninteractive
+
+###ADD you code document
+#VOLUME ["<mountpoint>"]
+
+### www 
+EXPOSE 80
+
 RUN mv /etc/apt/sources.list  /etc/apt/sources.list_bak
 ADD ./config/sources.list /etc/apt/
 RUN apt-get update && apt-get -y upgrade
@@ -31,6 +37,8 @@ RUN apt-get install -y php5 php5-cgi php5-cli php5-common php5-curl \
 
 ##RUN apt-get install -y openjdk-7-jdk
 
+RUN apt-get install -y vim git maven
+
 #####配置 Apache 
 RUN a2enmod rewrite
 RUN php5enmod mcrypt
@@ -43,14 +51,15 @@ RUN service apache2 restart
 #######   install wget
 RUN apt-get install wget
 
+WORKDIR /usr/src/
+
+RUN  wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u80-b15/jdk-7u80-linux-x64.tar.gz
 ##### build jni
 ADD ./config/jni /usr/src/jni/
-WORKDIR /usr/src/
-RUN chmod +x ./jni/make.sh
-WORKDIR /usr/src/
+RUN chmod +x ./jni/make.sh ./jni/set_path.sh
+
 #RUN apt-get install -y aria2
 #RUN aria2c --header="Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u80-b15/jdk-7u80-linux-x64.tar.gz
-RUN  wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u80-b15/jdk-7u80-linux-x64.tar.gz
 RUN tar -zxvf jdk-7u80-linux-x64.tar.gz -C /usr/src/
 
 ####composer and laravel 按需求安装 可能需要翻墙
@@ -63,42 +72,23 @@ RUN composer global require "laravel/installer=~1.1"
 RUN apt-get install -y gcc
 
 #### set PATH
-RUN echo "export JAVA_HOME=/usr/src/jdk1.7.0_80" >> /etc/profile
-CMD ["/bin/bash" , "source /etc/profile"]
-RUN echo "export PATH=\$PATH:\$JAVA_HOME/bin:~/.composer/vendor/bin" >> /etc/profile
-RUN echo "export JRE_HOME=\$JAVA_HOME/jre" >> /etc/profile
-CMD ["/bin/bash" , "source /etc/profile"]
-RUN echo "export CLASSPATH=.:\$JAVA_HOME/lib:\$JRE_HOME/lib" >> /etc/profile
-CMD ['/bin/bash','source /etc/profile']
-CMD ['/bin/sh','source /etc/profile']
-CMD ["/bin/bash" , "source /etc/profile"] 
-CMD ["/bin/bash" , "javac -version"]  
-CMD ["/bin/bash" , "composer"]
+RUN ["/bin/bash" , "./jni/set_path.sh"]
 
+#CMD ["/bin/bash" , "./jni/set_path.sh"]
 
+WORKDIR /usr/src/jni/
 
-CMD ["/bin/bash" , "./jni/make.sh"]
-RUN cp ./jni/liblajpmsgq.so /usr/lib/
+RUN ["/bin/bash" , "./make.sh"]
+RUN cp liblajpmsgq.so /usr/lib/
 
+WORKDIR /usr/src/
 RUN rm jdk-7u80-linux-x64.tar.gz
 RUN rm -fr /usr/src/jni
-
-###### install jdk maven
-RUN apt-get install -y maven
- 
-###### install git
-RUN apt-get install -y git
 
 #### config for git
 #RUN git config --global user.name "xxxxx"
 #RUN git config --global user.email "xxxxx@xx.com"
 # RUN ssh-keygen
 
-
-
-
-RUN apt-get install -y vim
-
-# EXPOSE 80
 RUN apt-get autoclean && apt-get clean && apt-get autoremove
 
